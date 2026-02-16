@@ -1,21 +1,20 @@
-Audiobook Generation Guide: Kokoro-ONNX (Cloud Edition)
+# Audiobook Generation Guide: Kokoro-ONNX (Cloud Edition)
+
 This setup uses Google Colab's NVIDIA T4 GPU to generate high-quality audiobooks at roughly 30x–50x real-time speed. It is designed specifically to handle BookNLP token files and output a final M4B with clickable chapters.
 
-🛠️ Initial Setup (Google Colab)
-Open Colab: Go to colab.research.google.com.
+## Initial Setup (Google Colab)
 
-Enable GPU: Navigate to Runtime > Change runtime type > Select T4 GPU.
+1. **Open Colab:** Go to `colab.research.google.com`.
+2. **Enable GPU:** Navigate to **Runtime** > **Change runtime type** > Select **T4 GPU**.
+3. **Upload Files:** Click the Folder icon (📂) on the left sidebar and upload the following files:
+   * `book_analysis.tokens` (BookNLP output)
+   * `my_book.book` (Your character mapping file)
 
-Upload Files: Click the Folder icon (📂) on the left sidebar and upload the following files:
+## The Generation Script
 
-book_analysis.tokens (Your BookNLP output)
-
-my_book.book (Your character mapping file)
-
-The Generation Script
 Paste the code below into a Colab code cell and run it. It includes text-cleaning functions and GPU acceleration for fast processing.
 
-Python
+```python
 # 1. Install GPU-enabled runtime and dependencies
 !sudo apt-get install -y espeak-ng > /dev/null 2>&1
 !pip install kokoro-onnx soundfile onnxruntime-gpu > /dev/null 2>&1
@@ -42,9 +41,9 @@ os.makedirs(OUTPUT_FOLDER, exist_ok=True)
 
 # --- DOWNLOADS ---
 if not os.path.exists(MODEL_PATH):
-    urllib.request.urlretrieve("https://github.com/thewh1teagle/kokoro-onnx/releases/download/model-files/kokoro-v0_19.onnx", MODEL_PATH)
+    urllib.request.urlretrieve("[https://github.com/thewh1teagle/kokoro-onnx/releases/download/model-files/kokoro-v0_19.onnx](https://github.com/thewh1teagle/kokoro-onnx/releases/download/model-files/kokoro-v0_19.onnx)", MODEL_PATH)
 if not os.path.exists(VOICES_PATH):
-    urllib.request.urlretrieve("https://github.com/thewh1teagle/kokoro-onnx/releases/download/model-files-v1.0/voices-v1.0.bin", VOICES_PATH)
+    urllib.request.urlretrieve("[https://github.com/thewh1teagle/kokoro-onnx/releases/download/model-files-v1.0/voices-v1.0.bin](https://github.com/thewh1teagle/kokoro-onnx/releases/download/model-files-v1.0/voices-v1.0.bin)", VOICES_PATH)
 
 # --- SETTINGS ---
 # Map your book characters to specific voices here
@@ -95,7 +94,7 @@ def generate_single_audio(text, voice):
         return np.concatenate([samples, np.zeros(int(sr * 0.05), dtype=np.float32)])
     except: return None
 
-print(f"🎙️ Generating...")
+print(f"Generating audio...")
 for i, line in enumerate(lines):
     parts = line.strip().split("\t")
     if len(parts) < 14: continue
@@ -141,10 +140,11 @@ with open(METADATA_FILE, "w", encoding="utf-8") as f:
     json.dump(chapter_markers, f, indent=4)
 
 shutil.make_archive("audiobook_finished", 'zip', OUTPUT_FOLDER)
-print("🎉 Done! Download 'audiobook_finished.zip' and 'chapter_metadata.json'")
-🏁 Final Steps (Local PC)
-Download Files: Retrieve audiobook_finished.zip and chapter_metadata.json from your Colab environment.
+print("Done! Download 'audiobook_finished.zip' and 'chapter_metadata.json'")
+```
 
-Unzip: Extract the .wav files and place them into your local audiobook_output/parts/ directory.
+## Final Steps (Local PC)
 
-Run Stitcher: Execute your local create_m4b_with_chapters() script to compile the final audiobook.
+1. **Download Files:** Retrieve `audiobook_finished.zip` and `chapter_metadata.json` from your Colab environment.
+2. **Unzip:** Extract the `.wav` files and place them into your local `audiobook_output/parts/` directory.
+3. **Run Stitcher:** Execute your local `create_m4b_with_chapters()` script to compile the final audiobook.
